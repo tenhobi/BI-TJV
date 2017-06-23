@@ -1,6 +1,6 @@
-# BI-PJV
+# BI-TJV
 
-My work on BI-PJV in semester B171 at FIT CTU.
+My work on BI-TJV in semester B171 at FIT CTU.
 
 ## TL;DR
 
