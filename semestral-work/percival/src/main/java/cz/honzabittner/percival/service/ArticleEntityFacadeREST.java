@@ -7,6 +7,7 @@ package cz.honzabittner.percival.service;
 
 import cz.honzabittner.percival.entity.ArticleBox;
 import cz.honzabittner.percival.entity.ArticleEntity;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -26,7 +27,7 @@ import javax.ws.rs.core.MediaType;
  * @author HoBi
  */
 @Stateless
-@Path("cz.honzabittner.percival.articleentity")
+@Path("cz.honzabittner.percival.entity.articleentity")
 public class ArticleEntityFacadeREST extends AbstractFacade<ArticleEntity> {
 
     @PersistenceContext(unitName = "cz.honzabittner_percival_war_1.0-SNAPSHOTPU")
@@ -72,9 +73,29 @@ public class ArticleEntityFacadeREST extends AbstractFacade<ArticleEntity> {
     }
 
     @GET
+    @Path("search/{searched}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public ArticleBox findSearchedArticles(@PathParam("searched") String searched) {
+        List<ArticleEntity> allArticles = super.findAll();
+        List<ArticleEntity> searchedArticles = new ArrayList();
+
+        for (ArticleEntity article : allArticles) {
+            if ((article.getContent() != null && article.getContent().toLowerCase().contains(searched.trim().toLowerCase()))
+                    || (article.getTitle() != null && article.getTitle().toLowerCase().contains(searched.trim().toLowerCase()))) {
+                searchedArticles.add(article);
+            }
+        }
+
+        ArticleBox articles = new ArticleBox();
+        articles.setArticles(searchedArticles);
+        return articles;
+    }
+    
+    
+    @GET
     @Path("{from}/{to}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public ArticleBox findRangeArticles(@PathParam("from") Integer from, @PathParam("to") Integer to) {
+    public ArticleBox findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
         ArticleBox articles = new ArticleBox();
         articles.setArticles(super.findRange(new int[]{from, to}));
         return articles;
@@ -91,5 +112,4 @@ public class ArticleEntityFacadeREST extends AbstractFacade<ArticleEntity> {
     protected EntityManager getEntityManager() {
         return em;
     }
-
 }

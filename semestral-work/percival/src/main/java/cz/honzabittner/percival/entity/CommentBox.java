@@ -5,6 +5,7 @@
  */
 package cz.honzabittner.percival.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
  * @author HoBi
  */
 public class CommentBox {
-    private List<CommentEntity> comments;
+    private List<CommentEntity> comments = new ArrayList();
 
     public List<CommentEntity> getComments() {
         return comments;

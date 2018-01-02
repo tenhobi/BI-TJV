@@ -5,6 +5,7 @@
  */
 package cz.honzabittner.lancelot.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
  * @author HoBi
  */
 public class ArticleBox {
-    private List<ArticleEntity> articles;
+    private List<ArticleEntity> articles = new ArrayList();
 
     public List<ArticleEntity> getArticles() {
         return articles;

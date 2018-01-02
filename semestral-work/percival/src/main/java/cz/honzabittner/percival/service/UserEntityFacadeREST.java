@@ -7,6 +7,7 @@ package cz.honzabittner.percival.service;
 
 import cz.honzabittner.percival.entity.UserBox;
 import cz.honzabittner.percival.entity.UserEntity;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -26,7 +27,7 @@ import javax.ws.rs.core.MediaType;
  * @author HoBi
  */
 @Stateless
-@Path("cz.honzabittner.percival.userentity")
+@Path("cz.honzabittner.percival.entity.userentity")
 public class UserEntityFacadeREST extends AbstractFacade<UserEntity> {
 
     @PersistenceContext(unitName = "cz.honzabittner_percival_war_1.0-SNAPSHOTPU")
@@ -72,10 +73,31 @@ public class UserEntityFacadeREST extends AbstractFacade<UserEntity> {
     }
 
     @GET
+    @Path("search/{searched}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public UserBox findSearchedUsers(@PathParam("searched") String searched) {
+        List<UserEntity> allUsers = super.findAll();
+        List<UserEntity> searchedUsers = new ArrayList();
+
+        for (UserEntity user : allUsers) {
+            if ((user.getNickname() != null && user.getNickname().toLowerCase().contains(searched.trim().toLowerCase()))
+                    || (user.getFirstName() != null && user.getFirstName().toLowerCase().contains(searched.trim().toLowerCase()))
+                    || (user.getLastName() != null && user.getLastName().toLowerCase().contains(searched.trim().toLowerCase()))
+                    || (user.getDescription() != null && user.getDescription().toLowerCase().contains(searched.trim().toLowerCase()))) {
+                searchedUsers.add(user);
+            }
+        }
+
+        UserBox users = new UserBox();
+        users.setUsers(searchedUsers);
+        return users;
+    }
+
+    @GET
     @Path("{from}/{to}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public UserBox findRangeUsers(@PathParam("from") Integer from, @PathParam("to") Integer to) {
-         UserBox users = new UserBox();
+    public UserBox findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
+        UserBox users = new UserBox();
         users.setUsers(super.findRange(new int[]{from, to}));
         return users;
     }
@@ -91,5 +113,5 @@ public class UserEntityFacadeREST extends AbstractFacade<UserEntity> {
     protected EntityManager getEntityManager() {
         return em;
     }
-    
+
 }

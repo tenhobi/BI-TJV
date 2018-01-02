@@ -6,6 +6,8 @@
 package cz.honzabittner.percival.entity;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,7 +25,8 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 public class UserEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -36,14 +39,34 @@ public class UserEntity implements Serializable {
         this.id = id;
     }
     
-    private String name;
+    private String nickname;
 
-    public String getName() {
-        return name;
+    public String getNickname() {
+        return nickname;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    private String firstName;
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+    
+    private String lastName;
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
     
     private String description;
@@ -54,6 +77,16 @@ public class UserEntity implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    private LocalDate birthdate;
+
+    public LocalDate getBirthdate() {
+        return birthdate;
+    }
+
+    public void setBirthdate(LocalDate birthdate) {
+        this.birthdate = birthdate;
     }
     
     @OneToMany(mappedBy = "author")

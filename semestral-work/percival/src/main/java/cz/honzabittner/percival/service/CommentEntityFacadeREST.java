@@ -7,6 +7,7 @@ package cz.honzabittner.percival.service;
 
 import cz.honzabittner.percival.entity.CommentBox;
 import cz.honzabittner.percival.entity.CommentEntity;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -26,7 +27,7 @@ import javax.ws.rs.core.MediaType;
  * @author HoBi
  */
 @Stateless
-@Path("cz.honzabittner.percival.commententity")
+@Path("cz.honzabittner.percival.entity.commententity")
 public class CommentEntityFacadeREST extends AbstractFacade<CommentEntity> {
 
     @PersistenceContext(unitName = "cz.honzabittner_percival_war_1.0-SNAPSHOTPU")
@@ -74,12 +75,31 @@ public class CommentEntityFacadeREST extends AbstractFacade<CommentEntity> {
     @GET
     @Path("{from}/{to}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public CommentBox findRangeComments(@PathParam("from") Integer from, @PathParam("to") Integer to) {
+    public CommentBox findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
         CommentBox comments = new CommentBox();
         comments.setComments(super.findRange(new int[]{from, to}));
         return comments;
     }
 
+    @GET
+    @Path("search/{searched}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public CommentBox findSearchedComments(@PathParam("searched") String searched) {
+        List<CommentEntity> allComments = super.findAll();
+        List<CommentEntity> searchedComments = new ArrayList();
+
+        for (CommentEntity comment : allComments) {
+            if (comment.getContent() != null && comment.getContent().toLowerCase().contains(searched.trim().toLowerCase())) {
+                searchedComments.add(comment);
+            }
+        }
+
+        CommentBox comments = new CommentBox();
+        comments.setComments(searchedComments);
+        System.out.println(comments.getComments().size());
+        return comments;
+    }
+    
     @GET
     @Path("count")
     @Produces(MediaType.TEXT_PLAIN)

@@ -6,6 +6,7 @@
 package cz.honzabittner.percival.entity;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.Entity;
@@ -25,7 +26,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 public class ArticleEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -80,6 +81,16 @@ public class ArticleEntity implements Serializable {
 
     public void setAuthor(UserEntity author) {
         this.author = author;
+    }
+    
+    private LocalDate cteationDate;
+
+    public LocalDate getCteationDate() {
+        return cteationDate;
+    }
+
+    public void setCteationDate(LocalDate cteationDate) {
+        this.cteationDate = cteationDate;
     }
 
     @Override
