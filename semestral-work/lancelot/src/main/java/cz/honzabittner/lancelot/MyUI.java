@@ -32,6 +32,7 @@ import cz.honzabittner.lancelot.entity.UserEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.ws.rs.ClientErrorException;
 import vaadin.scala.IndexedContainer;
 
 /**
@@ -150,18 +151,170 @@ public class MyUI extends UI {
         
         userBox.addComponent(userForm);
         userBox.setExpandRatio(userForm, 0.2f);
-        
+
         // Article Grid
         ArticleBox articles = ac.findAllArticles_JSON(ArticleBox.class);
         Grid<ArticleEntity> articleGrid = initArticleGrid(articles.getArticles());
         articleBox.addComponent(articleGrid);
         articleBox.setExpandRatio(articleGrid, 1.0f);
         
+        // Article Form
+        FormLayout articleForm = new FormLayout();
+        TextField atf0 = new TextField("ID");
+        atf0.setEnabled(false);
+        TextField atf1 = new TextField("ID autora");
+        TextField atf2 = new TextField("Název");
+        TextField atf3 = new TextField("Obsah");
+        Button ab1 = new Button("Editovat");
+        Button ab2 = new Button("Smazat");
+        Button ab3 = new Button("Vytvořit");
+        ab1.addClickListener(e -> {
+            ArticleEntity article = new ArticleEntity();
+            article.setId(Long.parseLong(atf0.getValue()));
+            UserEntity a = new UserEntity();
+            a.setId(Long.parseLong(atf1.getValue()));
+            article.setAuthor(a);
+            article.setTitle(atf2.getValue());
+            article.setContent(atf3.getValue());
+            ac.edit_JSON(article, atf0.getValue());
+            ArticleBox tmp = ac.findAllArticles_JSON(ArticleBox.class);
+            articleGrid.setItems(tmp.getArticles());
+            articleForm.setVisible(false);
+        });
+        ab2.addClickListener(e -> {
+            ac.remove(atf0.getValue());
+            ArticleBox tmp = ac.findAllArticles_JSON(ArticleBox.class);
+            articleGrid.setItems(tmp.getArticles());
+            articleForm.setVisible(false);
+        });
+        ab3.addClickListener(e -> {
+            ArticleEntity article = new ArticleEntity();
+            UserEntity a = new UserEntity();
+            a.setId(Long.parseLong(atf1.getValue()));
+            article.setAuthor(a);
+            article.setTitle(atf2.getValue());
+            article.setContent(atf3.getValue());
+            ac.create_JSON(article);
+            ArticleBox tmp = ac.findAllArticles_JSON(ArticleBox.class);
+            articleGrid.setItems(tmp.getArticles());
+            articleForm.setVisible(false);
+        });
+        articleForm.setVisible(false);
+        articleForm.addComponents(atf0, atf1, atf2, atf3, new HorizontalLayout(ab1, ab2, ab3));
+        
+        articleGrid.addSelectionListener(event -> {
+            Set<ArticleEntity> selected = event.getAllSelectedItems();
+            
+            if (selected.size() > 0) {
+                ArticleEntity article = selected.stream().findFirst().get();
+                articleForm.setVisible(true);
+                ab1.setVisible(true);
+                ab2.setVisible(true);
+                ab3.setVisible(false);
+                
+                atf0.setValue(article.getId().toString());
+                atf1.setValue((article.getAuthor() == null) ? null : article.getAuthor().getId().toString());
+                atf2.setValue(article.getTitle());
+                atf3.setValue(article.getContent());
+            } else {
+                articleForm.setVisible(false);
+                ab1.setVisible(false);
+                ab2.setVisible(false);
+                ab3.setVisible(false);
+                
+                atf0.setValue("");
+                atf1.setValue("");
+                atf2.setValue("");
+                atf3.setValue("");
+            }            
+        });
+        
+        articleBox.addComponent(articleForm);
+        articleBox.setExpandRatio(articleForm, 0.2f);
+        
         // Comment Grid
         CommentBox comments = cc.findAllComments_JSON(CommentBox.class);
         Grid<CommentEntity> commentGrid = initCommentGrid(comments.getComments());
         commentBox.addComponent(commentGrid);
         commentBox.setExpandRatio(commentGrid, 1.0f);
+        
+        // Comment Form
+        FormLayout commentForm = new FormLayout();
+        TextField ctf0 = new TextField("ID");
+        ctf0.setEnabled(false);
+        TextField ctf1 = new TextField("ID autora");
+        TextField ctf2 = new TextField("ID článku");
+        TextField ctf3 = new TextField("Komentář");
+        Button cb1 = new Button("Editovat");
+        Button cb2 = new Button("Smazat");
+        Button cb3 = new Button("Vytvořit");
+        cb1.addClickListener(e -> {
+            CommentEntity comment = new CommentEntity();
+            comment.setId(Long.parseLong(ctf0.getValue()));
+            UserEntity a = new UserEntity();
+            a.setId(Long.parseLong(ctf1.getValue()));
+            comment.setAuthor(a);
+            ArticleEntity b = new ArticleEntity();
+            b.setId(Long.parseLong(ctf2.getValue()));
+            comment.setArticle(b);
+            comment.setContent(ctf3.getValue());
+            cc.edit_JSON(comment, ctf0.getValue());
+            CommentBox tmp = cc.findAllComments_JSON(CommentBox.class);
+            commentGrid.setItems(tmp.getComments());
+            commentForm.setVisible(false);
+        });
+        cb2.addClickListener(e -> {
+            cc.remove(ctf0.getValue());
+            CommentBox tmp = cc.findAllComments_JSON(CommentBox.class);
+            commentGrid.setItems(tmp.getComments());
+            commentForm.setVisible(false);
+        });
+        cb3.addClickListener(e -> {
+            CommentEntity comment = new CommentEntity();
+            UserEntity a = new UserEntity();
+            a.setId(Long.parseLong(ctf1.getValue()));
+            comment.setAuthor(a);
+            ArticleEntity b = new ArticleEntity();
+            b.setId(Long.parseLong(ctf2.getValue()));
+            comment.setArticle(b);
+            comment.setContent(ctf3.getValue());
+            cc.create_JSON(comment);
+            CommentBox tmp = cc.findAllComments_JSON(CommentBox.class);
+            commentGrid.setItems(tmp.getComments());
+            commentForm.setVisible(false);
+        });
+        commentForm.setVisible(false);
+        commentForm.addComponents(ctf0, ctf1, ctf2, ctf3, new HorizontalLayout(cb1, cb2, cb3));
+        
+        commentGrid.addSelectionListener(event -> {
+            Set<CommentEntity> selected = event.getAllSelectedItems();
+            System.out.println(selected.size());
+            if (selected.size() > 0) {
+                CommentEntity comment = selected.stream().findFirst().get();
+                commentForm.setVisible(true);
+                cb1.setVisible(true);
+                cb2.setVisible(true);
+                cb3.setVisible(false);
+                
+                ctf0.setValue(comment.getId().toString());
+                ctf1.setValue((comment.getAuthor() == null) ? null : comment.getAuthor().getId().toString());
+                ctf2.setValue((comment.getArticle() == null) ? null : comment.getArticle().getId().toString());
+                ctf3.setValue(comment.getContent());
+            } else {
+                commentForm.setVisible(false);
+                cb1.setVisible(false);
+                cb2.setVisible(false);
+                cb3.setVisible(false);
+                
+                ctf0.setValue("");
+                ctf1.setValue("");
+                ctf2.setValue("");
+                ctf3.setValue("");
+            }            
+        });
+        
+        commentBox.addComponent(commentForm);
+        commentBox.setExpandRatio(commentForm, 0.2f);
         
         // Buttons
         Button userButton = new Button("Uživatelé");
@@ -224,7 +377,25 @@ public class MyUI extends UI {
                 utf4.setValue(null);
                 utf5.setValue("");
             } else if (articleBox.isVisible()) {
+                articleForm.setVisible(true);
+                ab1.setVisible(false);
+                ab2.setVisible(false);
+                ab3.setVisible(true);
+                
+                atf0.setValue("");
+                atf1.setValue("");
+                atf2.setValue("");
+                atf3.setValue("");
             } else if (commentBox.isVisible()) {
+                commentForm.setVisible(true);
+                cb1.setVisible(false);
+                cb2.setVisible(false);
+                cb3.setVisible(true);
+                
+                ctf0.setValue("");
+                ctf1.setValue("");
+                ctf2.setValue("");
+                ctf3.setValue("");
           }
         });
         

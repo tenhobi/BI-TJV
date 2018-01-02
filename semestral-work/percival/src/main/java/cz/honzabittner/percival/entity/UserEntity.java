@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -89,7 +90,7 @@ public class UserEntity implements Serializable {
         this.birthdate = birthdate;
     }
     
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<CommentEntity> comments;
 
     @XmlTransient
@@ -101,7 +102,7 @@ public class UserEntity implements Serializable {
         this.comments = comments;
     }
     
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<ArticleEntity> articles;
 
     @XmlTransient
