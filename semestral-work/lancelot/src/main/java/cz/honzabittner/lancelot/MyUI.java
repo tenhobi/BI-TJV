@@ -9,10 +9,12 @@ import com.vaadin.server.UserError;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.UI;
@@ -29,6 +31,7 @@ import cz.honzabittner.lancelot.entity.UserBox;
 import cz.honzabittner.lancelot.entity.UserEntity;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import vaadin.scala.IndexedContainer;
 
 /**
@@ -66,11 +69,87 @@ public class MyUI extends UI {
         UserBox users = uc.findAllUsers_JSON(UserBox.class);
         Grid<UserEntity> userGrid = initUserGrid(users.getUsers());
         userBox.addComponent(userGrid);
-        userBox.setExpandRatio(userGrid, 1.0f);
+        userBox.setExpandRatio(userGrid, 0.8f);
         
         // User Form
-        FormLayout userForm = initUserForm();
+        FormLayout userForm = new FormLayout();
+        TextField utf0 = new TextField("ID");
+        utf0.setEnabled(false);
+        TextField utf1 = new TextField("Jméno");
+        TextField utf2 = new TextField("Přijmení");
+        TextField utf3 = new TextField("Přezdívka");
+        DateField utf4 = new DateField("Datum narození");
+        TextField utf5 = new TextField("Popis");
+        Button ub1 = new Button("Editovat");
+        Button ub2 = new Button("Smazat");
+        Button ub3 = new Button("Vytvořit");
+        ub1.addClickListener(e -> {
+            UserEntity user = new UserEntity();
+            user.setId(Long.parseLong(utf0.getValue()));
+            user.setFirstName(utf1.getValue());
+            user.setLastName(utf2.getValue());
+            user.setNickname(utf3.getValue());
+            user.setBirthdate(utf4.getValue());
+            user.setDescription(utf5.getValue());
+            uc.edit_JSON(user, utf0.getValue());
+            UserBox tmp = uc.findAllUsers_JSON(UserBox.class);
+            userGrid.setItems(tmp.getUsers());
+            userForm.setVisible(false);
+        });
+        ub2.addClickListener(e -> {
+            uc.remove(utf0.getValue());
+            UserBox tmp = uc.findAllUsers_JSON(UserBox.class);
+            userGrid.setItems(tmp.getUsers());
+            userForm.setVisible(false);
+        });
+        ub3.addClickListener(e -> {
+            UserEntity user = new UserEntity();
+            user.setFirstName(utf1.getValue());
+            user.setLastName(utf2.getValue());
+            user.setNickname(utf3.getValue());
+            user.setBirthdate(utf4.getValue());
+            user.setDescription(utf5.getValue());
+            uc.create_JSON(user);
+            UserBox tmp = uc.findAllUsers_JSON(UserBox.class);
+            userGrid.setItems(tmp.getUsers());
+            userForm.setVisible(false);
+        });
+        userForm.setVisible(false);
+        userForm.addComponents(utf0, utf1, utf2, utf3, utf4, utf5, new HorizontalLayout(ub1, ub2, ub3));
+        
+        userGrid.addSelectionListener(event -> {
+            Set<UserEntity> selected = event.getAllSelectedItems();
+            
+            if (selected.size() > 0) {
+                UserEntity user = selected.stream().findFirst().get();
+                userForm.setVisible(true);
+                ub1.setVisible(true);
+                ub2.setVisible(true);
+                ub3.setVisible(false);
+                
+                utf0.setValue(user.getId().toString());
+                utf1.setValue(user.getFirstName());
+                utf2.setValue(user.getLastName());
+                utf3.setValue(user.getNickname());
+                utf4.setValue(user.getBirthdate());
+                utf5.setValue(user.getDescription());
+            } else {
+                userForm.setVisible(false);
+                ub1.setVisible(false);
+                ub2.setVisible(false);
+                ub3.setVisible(false);
+                
+                utf0.setValue("");
+                utf1.setValue("");
+                utf2.setValue("");
+                utf3.setValue("");
+                utf4.setValue(null);
+                utf5.setValue("");
+            }            
+        });
+        
         userBox.addComponent(userForm);
+        userBox.setExpandRatio(userForm, 0.2f);
         
         // Article Grid
         ArticleBox articles = ac.findAllArticles_JSON(ArticleBox.class);
@@ -130,12 +209,27 @@ public class MyUI extends UI {
         search.addComponent(searchText);
         search.addComponent(searchButton);
         
+        Button newItem = new Button("Vytvořit záznam");
+        newItem.addClickListener(e -> {
+            if (userBox.isVisible()) {
+                userForm.setVisible(true);
+                ub1.setVisible(false);
+                ub2.setVisible(false);
+                ub3.setVisible(true);
+                
+                utf0.setValue("");
+                utf1.setValue("");
+                utf2.setValue("");
+                utf3.setValue("");
+                utf4.setValue(null);
+                utf5.setValue("");
+            } else if (articleBox.isVisible()) {
+            } else if (commentBox.isVisible()) {
+          }
+        });
+        
         // Layout        
-        layout.addComponent(buttons);
-        layout.addComponent(search);
-        layout.addComponent(userBox);        
-        layout.addComponent(articleBox);        
-        layout.addComponent(commentBox);        
+        layout.addComponents(buttons, search, newItem, userBox, articleBox, commentBox);
         setContent(layout);
     }
 
@@ -156,21 +250,7 @@ public class MyUI extends UI {
         grid.addColumn(UserEntity::getDescription).setCaption("Popis");
         return grid;
     }
-    
-    private FormLayout initUserForm() {
-        FormLayout form = new FormLayout();
-        TextField tf1 = new TextField("Name");
-        form.addComponent(tf1);
-
-        TextField tf2 = new TextField("Street address");
-        form.addComponent(tf2);
-
-        TextField tf3 = new TextField("Postal code");
-        form.addComponent(tf3);
-        
-        return form;
-    }
-    
+   
     private Grid<ArticleEntity> initArticleGrid(List<ArticleEntity> articles) {
         Grid<ArticleEntity> grid = new Grid<>();
         grid.setSizeFull();
