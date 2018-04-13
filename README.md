@@ -1,6 +1,6 @@
 # BI-TJV
 
-My work on BI-TJV in semester B171 at FIT CTU.
+My work on BI-TJV in semester B171 at [FIT CTU](https://fit.cvut.cz/en).
 
 ## TL;DR
 
